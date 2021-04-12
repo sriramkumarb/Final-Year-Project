@@ -5,7 +5,7 @@ import os
 import shutil
 import csv
 import numpy as np
-import playsound
+from playsound import playsound
 from PIL import Image, ImageTk
 import pandas as pd
 import datetime
@@ -116,7 +116,7 @@ def TakeImages():
             for (x, y, w, h) in faces:
                 cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
                 sampleNum = sampleNum+1
-                cv2.imwrite("Dataset\ "+name + "."+Id + '.' +
+                cv2.imwrite("Dataset/ "+name + "."+Id + '.' +
                             str(sampleNum) + ".jpg", gray[y:y+h, x:x+w])
                 cv2.imshow('KUNU', img)
             if cv2.waitKey(100) & 0xFF == ord('q'):
@@ -127,7 +127,7 @@ def TakeImages():
         cv2.destroyAllWindows()
         res = "Images Saved for ID : " + Id + " Name : " + name
         row = [Id, name]
-        with open('StudentDetails\StudentDetails.csv', 'a+') as csvFile:
+        with open('StudentDetails/StudentDetails.csv', 'a+') as csvFile:
             writer = csv.writer(csvFile)
             writer.writerow(row)
         csvFile.close()
@@ -148,7 +148,7 @@ def TrainImages():
     detector = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
     faces, Id = getImagesAndLabels("Dataset")
     recognizer.train(faces, np.array(Id))
-    recognizer.save("recognizer\Trainner.yml")
+    recognizer.save("recognizer/Trainner.yml")
     res = "Images are Trained"
     message.configure(text=res)
 
@@ -167,11 +167,12 @@ def getImagesAndLabels(path):
 
 
 def TrackImages():
+    global master_attendance
     recognizer = cv2.face.LBPHFaceRecognizer_create()
-    recognizer.read("recognizer\Trainner.yml")
+    recognizer.read("recognizer/Trainner.yml")
     harcascadePath = "haarcascade_frontalface_default.xml"
     faceCascade = cv2.CascadeClassifier(harcascadePath)
-    df = pd.read_csv("StudentDetails\StudentDetails.csv")
+    df = pd.read_csv("StudentDetails/StudentDetails.csv")
     cam = cv2.VideoCapture(0)
     font = cv2.FONT_HERSHEY_SIMPLEX
     col_names = ['Id', 'Name', 'Date', 'Time']
@@ -218,10 +219,10 @@ def TrackImages():
                 tt = str(Id)
             if(conf > 150):
                 noOfFile = len(os.listdir("ImagesUnknown"))+1
-                cv2.imwrite("ImagesUnknown\Image"+str(noOfFile) +
+                cv2.imwrite("ImagesUnknown/Image"+str(noOfFile) +
                             ".jpg", im[y:y+h, x:x+w])
             cv2.putText(im, str(tt), (x, y+h), font, 1, (255, 255, 255), 2)
-        fileName = "Attendance\Attendance_"+date+".csv"
+        fileName = "Attendance/Attendance_"+date+".csv"
         master_attendance.to_csv(fileName, index=False)
         attendance = attendance.drop_duplicates(subset=['Id'], keep='first')
         cv2.imshow('im', im)
