@@ -16,6 +16,10 @@ import smtplib
 import random as r
 import matplotlib.pyplot as plt
 
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
 
 window = tk.Tk()
 # getting screen width and height of display
@@ -244,17 +248,42 @@ email = (email.get())
 
 
 def GetanEmail():
-    fromaddr = "Your Email"
-    toaddr = email
-    msg = "Your attendence is successful"
-    username = "Your Email"
-    password = "Your Password"
-    server = smtplib.SMTP("smtp.gmail.com:587")
-    server.ehlo()
+
+    # email function
+
+    email_user = 'sriramkumarbcse@gmail.com'
+    email_password = 'welcometocit'
+    email_send = 'sriramkumarb.citcse2017@gmail.com'
+
+    subject = 'subject'
+
+    msg = MIMEMultipart()
+    msg['From'] = email_user
+    msg['To'] = email_send
+    msg['Subject'] = subject
+
+    body = 'Hi there, sending this email from Python!'
+    msg.attach(MIMEText(body, 'plain'))
+
+    ts = time.time()
+    date = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d')
+    filename = 'F:\Projects\Facial-Recognition-Based-Attendence-Sysytem-master\Attendance\Attendance_'+date+'.csv'
+    attachment = open(filename, 'rb')
+
+    part = MIMEBase('application', 'octet-stream')
+    part.set_payload((attachment).read())
+    encoders.encode_base64(part)
+    part.add_header('Content-Disposition', "attachment; filename= "+filename)
+
+    msg.attach(part)
+    text = msg.as_string()
+    server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
-    server.login(username, password)
-    server.sendmail(fromaddr, toaddr, msg)
+    server.login(email_user, email_password)
+
+    server.sendmail(email_user, email_send, text)
     server.quit()
+
     res = "Mail send success"
     message.configure(text=res)
 
